@@ -1,0 +1,8 @@
+## Interface: 11508
+## Title: Herbarium
+## Notes: Trackt Kräuter
+## Author: DaftLeech
+## Version: 1.0.1
+## SavedVariables: HerbariumDB
+
+Herbarium.lua
