@@ -2,7 +2,7 @@
 ## Title: Herbarium
 ## Notes: Trackt Kräuter
 ## Author: DaftLeech
-## Version: 1.0.1
+## Version: 1.5.0
 ## SavedVariables: HerbariumDB
 
 data.lua
