@@ -2,129 +2,23 @@
 
 -- SavedVariables
 HerbariumlDB = HerbariumlDB or {}
-Herbarium = {}
+Herbarium = Herbarium or {}
 
 Herbarium.CurrentPage = 1
 
-Herbarium.herbalism = {
-		{1,   "Peacebloom", 133939},
-		{1,   "Silverleaf", 134190},
-		{15,  "Earthroot", 134187},
-		{50,  "Mageroyal", 133436},
-		{70,  "Briarthorn", 134412},
-		{85,  "Stranglekelp", 134191},
-		{100, "Bruiseweed", 134181},
-		{115, "Wild Steelbloom", 133938},
-		{120, "Grave Moss", 133849},
-		{125, "Kingsblood", 134183},
-		{150, "Liferoot", 134413},
-		{160, "Fadeleaf", 134193},
-		{170, "Goldthorn", 134196},
-		{185, "Khadgar's Whisker", 134188},
-		{195, "Wintersbite", 133940},
-		{205, "Firebloom", 134200},
-		{210, "Purple Lotus", 134198},
-		{220, "Arthas' Tears", 134194},
-		{230, "Sungrass", 134199},
-		{235, "Blindweed", 134195},
-		{245, "Ghost Mushroom", 134529},
-		{250, "Gromsblood", 134197},
-		{260, "Golden Sansam", 134221},
-		{270, "Dreamfoil", 134204},
-		{280, "Mountain Silversage", 134215},
-		{285, "Plaguebloom", 134219},
-		{290, "Icecap", 134212},
-		{300, "Black Lotus", 134202},
-	}
-
-Herbarium.professionRanks =  {
-		{75,  APPRENTICE},
-		{150, JOURNEYMAN},
-		{225, EXPERT},
-		{300, ARTISAN}
-	}
-
-Herbarium.L = {
-		["Peacebloom"]=   "Peacebloom",
-		["Silverleaf"]=   "Silverleaf",
-		["Earthroot"]=  "Earthroot",
-		["Mageroyal"]=  "Mageroyal",
-		["Briarthorn"]=  "Briarthorn",
-		["Stranglekelp"]=  "Stranglekelp",
-		["Bruiseweed"]= "Bruiseweed",
-		["Wild Steelbloom"]= "Wild Steelbloom",
-		["Grave Moss"]= "Grave Moss",
-		["Kingsblood"]= "Kingsblood",
-		["Liferoot"]= "Liferoot",
-		["Fadeleaf"]= "Fadeleaf",
-		["Goldthorn"]= "Goldthorn",
-		["Khadgar's Whisker"]= "Khadgar's Whisker",
-		["Wintersbite"]= "Wintersbite",
-		["Firebloom"]= "Firebloom",
-		["Purple Lotus"]= "Purple Lotus",
-		["Arthas' Tears"]= "Arthas' Tears",
-		["Sungrass"]= "Sungrass",
-		["Blindweed"]= "Blindweed",
-		["Ghost Mushroom"]= "Ghost Mushroom",
-		["Gromsblood"]= "Gromsblood",
-		["Golden Sansam"]= "Golden Sansam",
-		["Dreamfoil"]= "Dreamfoil",
-		["Mountain Silversage"]= "Mountain Silversage",
-		["Plaguebloom"]= "Plaguebloom",
-		["Icecap"]= "Icecap",
-		["Black Lotus"]= "Black Lotus",
-		["herbalism"]= "Herbalism"
-	}
-
-if GetLocale() == "deDE" then 
-
-	local L = Herbarium.L
-
-	L["Arthas' Tears"] = "Arthas' Tr\195\164nen"
-	L["Black Lotus"] = "Schwarzer Lotus"
-	L["Blindweed"] = "Blindkraut"
-	L["Briarthorn"] = "Wilddornrose"
-	L["Bruiseweed"] = "Beulengras"
-	L["Dreamfoil"] = "Traumblatt"
-	L["Earthroot"] = "Erdwurzel"
-	L["Fadeleaf"] = "Blassblatt"
-	L["Firebloom"] = "Feuerbl\195\188te"
-	L["Ghost Mushroom"] = "Geisterpilz"
-	L["Goldthorn"] = "Golddorn"
-	L["Grave Moss"] = "Grabmoos"
-	L["Golden Sansam"] = "Goldener Sansam"
-	L["Gromsblood"] = "Gromsblut"
-	L["Icecap"] = "Eiskappe"
-	L["Khadgar's Whisker"] = "Khadgars Schnurrbart"
-	L["Kingsblood"] = "K\195\182nigsblut"
-	L["Liferoot"] = "Lebenswurz"
-	L["Mageroyal"] = "Magusk\195\182nigskraut"
-	L["Mountain Silversage"] = "Bergsilbersalbei"
-	L["Peacebloom"] = "Friedensblume"
-	L["Plaguebloom"] = "Pestbl\195\188te"
-	L["Purple Lotus"] = "Lila Lotus"
-	L["Silverleaf"] = "Silberblatt"
-	L["Sungrass"] = "Sonnengras"
-	L["Stranglekelp"] = "W\195\188rgetang"
-	L["Swiftthistle"] = "Flitzdistel"
-	L["Wild Steelbloom"] = "Wildstahlblume"
-	L["Wildvine"] = "Wildranke"
-	L["Wintersbite"] = "Winterbiss"
-
-	L["Herbalism"] = "Kr\195\164uterkunde"
-	L["herbalism"] = "Kr\195\164uterkunde"
-
-end
 
 
+-- print function with color
 function Herbarium:PrintChat(message)
     print("|cff00ff00[Herbarium]|r " .. message)
 end
-
-
+-- ==========================================================================================
+-- create ui with all frames
+-- ==========================================================================================
 function Herbarium:CreateUI()
 	if( self.frame ) then return end
 	
+	-- base frame
 	local frame = CreateFrame("Frame", "HerbariumFrame", UIParent)
 	frame:SetMovable(true)
     frame:EnableMouse(true)
@@ -146,7 +40,7 @@ function Herbarium:CreateUI()
 			HideUIPanel(self.frame)
 		end)
 	
-	-- Frame type info
+	-- Frame type info for default ui 
 	frame:SetAttribute("UIPanelLayout-defined", true)
 	frame:SetAttribute("UIPanelLayout-enabled", true)
 	frame:SetAttribute("UIPanelLayout-pushable", 5)
@@ -155,12 +49,13 @@ function Herbarium:CreateUI()
 	table.insert(UISpecialFrames, frame:GetName())
 	HideUIPanel(self.frame)
 	
+	-- frame title
 	local title = frame:CreateFontString(nil, "ARTWORK")
 	title:SetFontObject(GameFontNormal)
 	title:SetPoint("CENTER", 6, 230)
 	title:SetText("Herbarium")
 	
-
+	-- frame icon topleft
 	local texture = frame:CreateTexture(nil, "BACKGROUND")
 	texture:SetWidth(58)
 	texture:SetHeight(58)
@@ -194,7 +89,7 @@ function Herbarium:CreateUI()
 	frame.bottomRight:SetTexture("Interface\\Spellbook\\UI-SpellbookPanel-BotRight")
 	
 	-- Next / prev Buttons
-
+	-- navigation frame
 	local naviFrame = CreateFrame("Frame", "HerbariumPageNavigationFrame", frame)
 	naviFrame.pageNumber = naviFrame:CreateFontString("HerbariumPageText", "OVERLAY")
 	naviFrame.pageNumber:SetFontObject("GameFontBlack")
@@ -235,8 +130,11 @@ function Herbarium:CreateUI()
 		HideUIPanel(self.frame)
 	end)
 
-	--plant Buttonframe
-
+	-- ==========================================================================================
+	-- plant-Grid / Buttonframe
+	-- all 12 slots for plants
+	-- created by "virtual" Template
+	-- ==========================================================================================
 	local plantButtonFrame = CreateFrame("Frame", "HerbariumPlantButtonFrame", frame)
 	plantButtonFrame:SetPoint("TOPLEFT", frame, "TOPLEFT")
 	plantButtonFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")	
@@ -289,6 +187,7 @@ function Herbarium:CreateUI()
 	plantButtonFrame.plantButton12:SetPoint("TOPLEFT", plantButtonFrame.plantButton6, 157, 0)
 	plantButtonFrame.plantButton12.id = 12
 	
+	-- connect to main frame
 	frame.plantButtonFrame = plantButtonFrame
 	frame.plantButtonList = {}
 	frame.plantButtonList[1] = plantButtonFrame.plantButton1
@@ -304,16 +203,57 @@ function Herbarium:CreateUI()
 	frame.plantButtonList[11] = plantButtonFrame.plantButton11
 	frame.plantButtonList[12] = plantButtonFrame.plantButton12
 
-	
+
+	-- ==========================================================================================
+	-- detail window
+	-- ==========================================================================================
+	local plantDetailFrame = CreateFrame("Frame", "HerbariumplantDetailFrame", frame)
+	plantDetailFrame:SetPoint("TOPLEFT", frame, "TOPLEFT")
+	plantDetailFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")	
+
+	plantDetailFrame.plantButton1 = Herbarium:plantButtonTemplate("plantButton1", plantDetailFrame)
+	plantDetailFrame.plantButton1:SetPoint("TOPLEFT", 34, -85)
+	plantDetailFrame.plantButton1.id = 0
+	plantDetailFrame.plantButton1:SetScript("OnClick", function ()
+		Herbarium.frame.plantDetailFrame:Hide()
+		Herbarium:Open()
+	end)
+	plantDetailFrame.plantButton1.plantName:SetFontObject("GameFontNormalLarge")
+	plantDetailFrame.plantButton1.plantName:SetSize(250, 0)
+
+	plantDetailFrame.zonesTitle = plantDetailFrame:CreateFontString(nil, "BORDER")
+	plantDetailFrame.zonesTitle:SetFontObject("QuestTitleFont")
+	plantDetailFrame.zonesTitle:SetMaxLines(2)
+	plantDetailFrame.zonesTitle:SetJustifyH("LEFT")
+	plantDetailFrame.zonesTitle:SetSize(300, 0)
+	plantDetailFrame.zonesTitle:SetPoint("TOPLEFT", plantDetailFrame.plantButton1, "BOTTOMLEFT", 0, -14)
+	plantDetailFrame.zonesTitle:SetText("Zones")
+
+	plantDetailFrame.zones = plantDetailFrame:CreateFontString(nil, "BORDER")
+	plantDetailFrame.zones:SetFontObject("QuestFont")
+	plantDetailFrame.zones:SetMaxLines(10)
+	plantDetailFrame.zones:SetJustifyH("LEFT")
+	plantDetailFrame.zones:SetSize(300, 0)
+	plantDetailFrame.zones:SetPoint("TOPLEFT", plantDetailFrame.zonesTitle, "BOTTOMLEFT", 0, -14)
+	plantDetailFrame.zones:SetText("")
+	plantDetailFrame.zones:Hide()
+
+	plantDetailFrame:Hide()
+
+	frame.plantDetailFrame = plantDetailFrame
+
 	self.frame = frame
 
 end
 
+-- ==========================================================================================
 -- Plant Icon template
+-- ==========================================================================================
 function Herbarium:plantButtonTemplate(name, parent)
 	local f = CreateFrame("CheckButton", name, parent)
 	f:SetWidth(37)
 	f:SetHeight(37)
+	f:SetHighlightTexture("Interface\\Buttons\\CheckButtonHilight", "ADD")
 
 	f.background = f:CreateTexture(nil, "BACKGROUND")
 	f.background:SetTexture("Interface\\Spellbook\\UI-Spellbook-SpellBackground")
@@ -324,7 +264,6 @@ function Herbarium:plantButtonTemplate(name, parent)
 	f.iconTexture = f:CreateTexture(nil, "BORDER")
 	f.iconTexture:SetTexture(133939)
 	f.iconTexture:SetAllPoints()
-	f.iconTexture:Hide()
 
 	f.plantName = f:CreateFontString(nil, "BORDER")
 	f.plantName:SetFontObject("GameFontNormal")
@@ -341,9 +280,75 @@ function Herbarium:plantButtonTemplate(name, parent)
 	f.plantSubName:SetJustifyH("LEFT")
 	f.plantSubName:SetSize(79, 18)
 	f.plantSubName:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 0, -2)
+	
+
+	f.id = 0
+
+	f:SetScript("OnClick", HerbariumOpenDetails_OnClick)
+
+	-- set Tooltip
+	f:SetScript("OnEnter", function (self, motion)
+		
+		if self.id == 0 then return end
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")	
+		GameTooltip:SetItemByID(Herbarium.herbalism[self.id][4])--		
+		CursorUpdate(self)
+		
+	end)
+	f:SetScript("OnLeave", function (frameButton, motion)
+		GameTooltip:Hide()
+		ResetCursor()
+	end)
 
 
 	return f
+end
+
+-- ==========================================================================================
+-- OnClick functions
+-- ==========================================================================================
+function HerbariumOpenDetails_OnClick(plantButton, button, down)
+
+	if plantButton.id > 0 then 
+
+		
+		local plantIndex = plantButton.id -- index in the UI-Grid
+		local plantItem = Herbarium.herbalism[plantIndex] -- plant Object(level,name,icon,id)
+		local plantItemId = Herbarium.herbalism[plantIndex][4] -- plant ItemId / object.id
+
+		local plantDetailButton = Herbarium.frame.plantDetailFrame.plantButton1 --button in detail frame
+		local zones = Herbarium.frame.plantDetailFrame.zones 
+		
+		plantDetailButton.id = plantIndex
+		plantDetailButton.iconTexture:SetTexture(plantItem[3])
+		plantDetailButton.iconTexture:Show()
+		
+		plantDetailButton.plantName:SetText(C_Item.GetItemNameByID(plantItemId))
+		plantDetailButton.plantName:Show()
+
+		zones:SetText("")
+		local countPrint = 1
+		for i, zone in pairs(Herbarium.zoneLinks[plantItemId]) do
+			if countPrint <= 20 then
+				if C_MapExplorationInfo.GetExploredMapTextures(zone[1]) then
+					countPrint = countPrint + 1
+					
+					if not zones:GetText() then
+						zones:SetText(C_Map.GetMapInfo(zone[1]).name)
+					else
+						zones:SetText(zones:GetText().. "\n" .. C_Map.GetMapInfo(zone[1]).name)
+					end
+				end
+				
+			end
+		end
+		zones:Show()
+
+		PlaySound(829)
+		Herbarium.frame.plantButtonFrame:Hide()
+		Herbarium.frame.naviFrame:Hide()
+		Herbarium.frame.plantDetailFrame:Show()
+	end
 end
 
 function HerbariumPrevPageButton_OnClick()
@@ -364,6 +369,9 @@ function HerbariumNextPageButton_OnClick()
 
 end
 
+-- ==========================================================================================
+-- profession level by name..
+-- ==========================================================================================
 function Herbarium:GetProfessionLevel()				
 	local numSkills = GetNumSkillLines();
 	for i=1, numSkills do
@@ -375,7 +383,9 @@ function Herbarium:GetProfessionLevel()
 	end
 end
 
-
+-- ==========================================================================================
+-- update UI-Grid-View depending on page
+-- ==========================================================================================
 function Herbarium:updatePlants()
 
 	local currentRank, currentMaxRank, skillmodifier  = Herbarium:GetProfessionLevel()
@@ -409,22 +419,26 @@ function Herbarium:updatePlants()
 				local index = indexPlant - (12 * (Herbarium.CurrentPage - 1))
 
 				-- get the Item-Box at the same Index
-				local plantItemAtIndex = Herbarium.frame.plantButtonList[index]
+				local plantButtonAtIndex = Herbarium.frame.plantButtonList[index]
 
+				-- save plant Index
+				plantButtonAtIndex.id = indexPlant
+				
 				-- gray-scale higher plants
-				plantItemAtIndex.iconTexture:SetDesaturated(nil)
-				plantItemAtIndex.plantName:SetFontObject("GameFontNormal")
+				plantButtonAtIndex.iconTexture:SetDesaturated(nil)
+				plantButtonAtIndex.plantName:SetFontObject("GameFontNormal")
 
 				if plantItem[1] > currentRank then
-					plantItemAtIndex.iconTexture:SetDesaturated(1)
-					plantItemAtIndex.plantName:SetFontObject("GameFontBlack")
+					plantButtonAtIndex.iconTexture:SetDesaturated(1)
+					plantButtonAtIndex.plantName:SetFontObject("GameFontBlack")
 				end
 				
 				-- fill the plant boxes and show them				
-				plantItemAtIndex.iconTexture:SetTexture(plantItem[3])
-				plantItemAtIndex.iconTexture:Show()
-				plantItemAtIndex.plantName:SetText(Herbarium.L[plantItem[2]])
-				plantItemAtIndex.plantName:Show()
+				plantButtonAtIndex.iconTexture:SetTexture(plantItem[3])
+				plantButtonAtIndex.iconTexture:Show()
+				--plantButtonAtIndex.plantName:SetText(Herbarium.L[plantItem[2]])
+				plantButtonAtIndex.plantName:SetText(C_Item.GetItemNameByID(plantItem[4]))
+				plantButtonAtIndex.plantName:Show()
 
 				
 
@@ -448,19 +462,28 @@ function Herbarium:updatePlants()
 		Herbarium.frame.naviFrame.nextButton:Disable()
 	end
 
+
+	Herbarium.frame.plantDetailFrame:Hide()
+	Herbarium.frame.plantButtonFrame:Show()
+	Herbarium.frame.naviFrame:Show()
+
 end
 
 
 function Herbarium:Open()
 	Herbarium:CreateUI()
 	Herbarium:updatePlants()
+	Herbarium:updatePlants()
 	PlaySound(829)
 	ShowUIPanel(self.frame)
+	
+	
 end
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("CHAT_MSG_SYSTEM")
 f:SetScript("OnEvent", HandleChatEvent)
+
 
 SLASH_Herbarium1 = "/Herbarium"
 SLASH_Herbarium1 = "/herb"

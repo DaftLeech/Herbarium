@@ -5,4 +5,5 @@
 ## Version: 1.0.1
 ## SavedVariables: HerbariumDB
 
+data.lua
 Herbarium.lua
