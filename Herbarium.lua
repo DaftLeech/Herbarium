@@ -528,7 +528,7 @@ local function HandleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 				plantNameEn = nameEn
 			end
 		end
-		
+
 		-- get the itemId
 		for i,v in ipairs(Herbarium.herbalism) do
 			if v[2] == plantNameEn then
@@ -557,6 +557,7 @@ local function HandleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 
 			local playerName = UnitName(arg1)
 			local itemID = Herbarium.CurrentPlantItemId
+			
 
 			-- create entry in DB if not exists..
 			if not HerbariumDB[playerName] or not HerbariumDB[playerName]["GATHERED"] or not HerbariumDB[playerName]["GATHERED"][itemID] then
@@ -565,12 +566,12 @@ local function HandleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 				PlaySound(7355)
 				PlaySound(3093)--3093 (writing sound) / 7355 (tutorial pling)
 				if Herbarium.CurrentPlantName then
-					Herbarium:PrintChat("First time gathered: " .. Herbarium.CurrentPlantName)
+					Herbarium:PrintChat(Herbarium.L["GatherFirst"] .. Herbarium.CurrentPlantName)
 				end
 				
 			else 
 				-- .. else count up
-				local currentGatherCount = Herbarium:ensureGet(HerbariumDB, playerName, "GATHERED", itemID)
+				local currentGatherCount = ensureGet(HerbariumDB, playerName, "GATHERED", itemID)
 				ensureSet(HerbariumDB, currentGatherCount + 1, playerName, "GATHERED", itemID)
 			end
 
@@ -827,7 +828,7 @@ end
 -- debug functions
 -- ==========================================================================================
 local function debugEvent()
-	HandleEvent(Herbarium, "UNIT_SPELLCAST_SENT", "player", "Grabmoos", "GUID", 2366, nil)
+	HandleEvent(Herbarium, "UNIT_SPELLCAST_SENT", "player", Herbarium.L["Grave Moss"], "GUID", 2366, nil)
 	HandleEvent(Herbarium, "UNIT_SPELLCAST_SUCCEEDED", "player", "GUID", 2366, nil, nil)
 end
 
@@ -852,7 +853,10 @@ end
 local function debug()
 	---[[
 	--debug event
-	--resetDB("GATHERED")
+	--resetDB("Franzfrozt")
+	print(dump(HerbariumDB))
+	print(dump(Herbarium.L))
+
 	ensureSet(HerbariumDB, 3, "Franzfrozt", "GATHERED", 2447) -- Peacebloom 3
 	ensureSet(HerbariumDB, 1, "Franzfrozt", "GATHERED", 765) -- Silverleaf 1
 	ensureSet(HerbariumDB, 2, "Franzfrozt", "GATHERED", 2449) -- Earthroot 2
@@ -862,14 +866,14 @@ local function debug()
 	
 	
 	removeItem("Franzfrozt", "GATHERED", 3369)
-	--removeItem("Franzfrozt", "GATHERED", 2450)
+	removeItem("Franzfrozt", "GATHERED", 2450)
 	debugEvent()
 
 	print(hasCompletedAchievement(APPRENTICE))
 	print(hasFinishedAchievement(APPRENTICE))
 	--updateAchievementFrame(Herbarium.herbalism[1][3],APPRENTICE)
 	-- dump database
-	print(dump(HerbariumDB))
+	
 	--print(dump(Herbarium.L))
 	--]]
 	
@@ -884,6 +888,7 @@ SLASH_Herbarium1 = "/Herbarium"
 SLASH_Herbarium1 = "/herb"
 SlashCmdList["Herbarium"] = function()
     
+	--wdebug()
        
     if Herbarium.frame and Herbarium.frame:IsShown() then
         HideUIPanel(Herbarium.frame)
@@ -891,7 +896,7 @@ SlashCmdList["Herbarium"] = function()
         Herbarium:Open()
     end
 
-	--debug()
+	
 	
 end
 

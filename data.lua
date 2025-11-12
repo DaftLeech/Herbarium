@@ -398,7 +398,8 @@ Herbarium.L = {
 		["herbalism"]= "Herbalism",
         ["Gathered"] = "Gathered",
         ["Herb Gathering"] = "Herb Gathering",
-        ["Completed"] = "completed"
+        ["Completed"] = "completed",
+        ["GatherFirst"] = "First time gathered: "
 	}
 
 if GetLocale() == "deDE" then 
@@ -441,6 +442,7 @@ if GetLocale() == "deDE" then
     L["Gathered"] = "Gesammelt"
     L["Herb Gathering"] = "Kr\195\164utersammeln"
     L["Completed"] = "abgeschlossen"
+    L["GatherFirst"] = "Zum ersten mal gesammelt: "
 
 end
 
