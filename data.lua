@@ -282,7 +282,7 @@ Herbarium.herbalism = {
     {15,  "Earthroot",              134187,  2449},
     {50,  "Mageroyal",              133436,   785},
     {70,  "Briarthorn",             134412,  2450},
-    {85,  "Stranglekelp",           134191,  3357},
+    {85,  "Stranglekelp",           134191,  3820},
     {100, "Bruiseweed",             134181,  2453},
     {115, "Wild Steelbloom",        133938,  3355},
     {120, "Grave Moss",             133849,  3369},
@@ -395,7 +395,10 @@ Herbarium.L = {
 		["Plaguebloom"]= "Plaguebloom",
 		["Icecap"]= "Icecap",
 		["Black Lotus"]= "Black Lotus",
-		["herbalism"]= "Herbalism"
+		["herbalism"]= "Herbalism",
+        ["Gathered"] = "Gathered",
+        ["Herb Gathering"] = "Herb Gathering",
+        ["Completed"] = "completed"
 	}
 
 if GetLocale() == "deDE" then 
@@ -435,5 +438,30 @@ if GetLocale() == "deDE" then
 
 	L["Herbalism"] = "Kr\195\164uterkunde"
 	L["herbalism"] = "Kr\195\164uterkunde"
+    L["Gathered"] = "Gesammelt"
+    L["Herb Gathering"] = "Kr\195\164utersammeln"
+    L["Completed"] = "abgeschlossen"
 
+end
+
+--autotranslate
+local countNil = 1
+local maxtrys = 3
+while countNil > 0 and maxtrys > 0 do
+    
+    countNil = 0
+    maxtrys = maxtrys - 1
+    for _, herb in pairs(Herbarium.herbalism) do
+        for name, translation in pairs(Herbarium.L) do
+            if herb[2] == name then
+                local translatedName = C_Item.GetItemNameByID(herb[4])
+                if translatedName then 
+                    Herbarium.L[name] = translatedName
+                else
+                    countNil = countNil + 1
+                end
+            end
+            
+        end
+    end
 end
