@@ -1,4 +1,4 @@
-local _, herbariumData = ...
+local _, Herbarium = ...
 
 Herbarium = Herbarium or {}
 
@@ -726,23 +726,21 @@ if GetLocale() == "deDE" then
 end
 
 --autotranslate
-local countNil = 1
-local maxtrys = 3
-while countNil > 0 and maxtrys > 0 do
-    
-    countNil = 0
-    maxtrys = maxtrys - 1
-    for _, herb in pairs(Herbarium.herbs) do
-        for name, translation in pairs(Herbarium.L) do
-            if herb[2] == name then
-                local translatedName = C_Item.GetItemNameByID(herb.itemId)
-                if translatedName then 
-                    Herbarium.L[name] = translatedName
-                else
-                    countNil = countNil + 1
-                end
-            end
-            
-        end
+
+local function loadItemName(itemId, callback)
+    local item = Item:CreateFromItemID(itemId)
+
+    if item:IsItemDataCached() then
+        callback(item:GetItemName())
+    else
+        item:ContinueOnItemLoad(function()
+            callback(item:GetItemName())
+        end)
     end
+end
+
+for _, herb in ipairs(Herbarium.herbs) do
+    loadItemName(herb.itemId, function(localizedName)
+        Herbarium.L[herb.name] = localizedName
+    end)
 end

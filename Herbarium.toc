@@ -2,8 +2,14 @@
 ## Title: Herbarium
 ## Notes: Trackt Kräuter
 ## Author: DaftLeech
-## Version: 1.9.1
+## Version: 1.9.2
 ## SavedVariables: HerbariumDB
 
 data.lua
+util\database.lua
+
+userinterface\herbariumFrame.lua
+userinterface\herbariumAchievement.lua
+
 Herbarium.lua
+util\eventhandler.lua
