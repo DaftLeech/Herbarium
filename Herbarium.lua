@@ -284,6 +284,7 @@ function Herbarium:plantButtonTemplate(name, parent)
 	
 
 	f.id = 0
+	f.itemId = 0
 
 	f:SetScript("OnClick", HerbariumOpenDetails_OnClick)
 
@@ -292,7 +293,7 @@ function Herbarium:plantButtonTemplate(name, parent)
 		
 		if self.id == 0 then return end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")	
-		GameTooltip:SetItemByID(Herbarium.herbalism[self.id][4])--		
+		GameTooltip:SetItemByID(self.itemId)--		
 		CursorUpdate(self)
 		
 	end)
@@ -314,14 +315,15 @@ function HerbariumOpenDetails_OnClick(plantButton, button, down)
 
 		
 		local plantIndex = plantButton.id -- index in the UI-Grid
-		local plantItem = Herbarium.herbalism[plantIndex] -- plant Object(level,name,icon,id)
-		local plantItemId = Herbarium.herbalism[plantIndex][4] -- plant ItemId / object.id
+		local plantItem = Herbarium.herbs[plantIndex] -- plant Object(level,name,icon,id)
+		local plantItemId = plantItem.itemId -- plant ItemId / object.id
 
 		local plantDetailButton = Herbarium.frame.plantDetailFrame.plantButton1 --button in detail frame
 		local zones = Herbarium.frame.plantDetailFrame.zones 
 		
 		plantDetailButton.id = plantIndex
-		plantDetailButton.iconTexture:SetTexture(plantItem[3])
+		plantDetailButton.itemId = plantItemId
+		plantDetailButton.iconTexture:SetTexture(plantItem.icon)
 		plantDetailButton.iconTexture:Show()
 		
 		plantDetailButton.plantName:SetText(C_Item.GetItemNameByID(plantItemId))
@@ -411,8 +413,8 @@ function Herbarium:updatePlants()
 	--set Items
 	local minIndex, maxIndex = 1 + (12 * (Herbarium.CurrentPage - 1)), 12 + (12 * (Herbarium.CurrentPage - 1))
 	
-	for indexPlant, plantItem in pairs(Herbarium.herbalism) do
-		if plantItem[1] <= currentMaxRank and plantItem[2] then			
+	for indexPlant, plantItem in ipairs(Herbarium.herbs) do
+		if plantItem.skill <= currentMaxRank then			
 
 			countItemsReachable = countItemsReachable + 1
 
@@ -423,29 +425,30 @@ function Herbarium:updatePlants()
 				-- get the Item-Box at the same Index
 				local plantButtonAtIndex = Herbarium.frame.plantButtonList[index]
 
-				-- save plant Index
+				-- save plant ItemId
+				plantButtonAtIndex.itemId = plantItem.itemId
 				plantButtonAtIndex.id = indexPlant
 				
 				-- gray-scale higher plants
 				plantButtonAtIndex.iconTexture:SetDesaturated(nil)
 				plantButtonAtIndex.plantName:SetFontObject("GameFontNormal")
 
-				if plantItem[1] > currentRank then
+				if plantItem.skill > currentRank then
 					plantButtonAtIndex.iconTexture:SetDesaturated(1)
 					plantButtonAtIndex.plantName:SetFontObject("GameFontBlack")
 				end
 				
 				-- fill the plant boxes and show them				
-				plantButtonAtIndex.iconTexture:SetTexture(plantItem[3])
+				plantButtonAtIndex.iconTexture:SetTexture(plantItem.icon)
 				plantButtonAtIndex.iconTexture:Show()
 				
-				plantButtonAtIndex.plantName:SetText(Herbarium.L[plantItem[2]])
+				plantButtonAtIndex.plantName:SetText(Herbarium.L[plantItem.name])
 				plantButtonAtIndex.plantName:Show()
 
 				-- check if gathered before
 				local playerName = UnitName("player")
 				local itemSlot = ensureGet(HerbariumDB, playerName, "GATHERED")
-				if itemSlot and itemSlot[plantItem[4]] then
+				if itemSlot and itemSlot[plantItem.itemId] then
 					plantButtonAtIndex.plantSubName:SetText(Herbarium.L["Gathered"])
 					plantButtonAtIndex.plantSubName:Show()
 				end
@@ -530,12 +533,7 @@ local function HandleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 		end
 
 		-- get the itemId
-		for i,v in ipairs(Herbarium.herbalism) do
-			if v[2] == plantNameEn then
-				Herbarium.CurrentPlantItemId = v[4]
-			end
-
-		end
+		Herbarium.CurrentPlantItemId = Herbarium.herbsByName[plantNameEn]
 		
 	end
 
@@ -556,12 +554,12 @@ local function HandleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 		if arg2 == Herbarium.CurrentPlantGUID and arg1 == "player" then
 
 			local playerName = UnitName(arg1)
-			local itemID = Herbarium.CurrentPlantItemId
+			local itemId = Herbarium.CurrentPlantItemId
 			
 
 			-- create entry in DB if not exists..
-			if not HerbariumDB[playerName] or not HerbariumDB[playerName]["GATHERED"] or not HerbariumDB[playerName]["GATHERED"][itemID] then
-				ensureSet(HerbariumDB, 1, playerName, "GATHERED", itemID)
+			if not HerbariumDB[playerName] or not HerbariumDB[playerName]["GATHERED"] or not HerbariumDB[playerName]["GATHERED"][itemId] then
+				ensureSet(HerbariumDB, 1, playerName, "GATHERED", itemId)
 
 				PlaySound(7355)
 				PlaySound(3093)--3093 (writing sound) / 7355 (tutorial pling)
@@ -571,8 +569,8 @@ local function HandleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 				
 			else 
 				-- .. else count up
-				local currentGatherCount = ensureGet(HerbariumDB, playerName, "GATHERED", itemID)
-				ensureSet(HerbariumDB, currentGatherCount + 1, playerName, "GATHERED", itemID)
+				local currentGatherCount = ensureGet(HerbariumDB, playerName, "GATHERED", itemId)
+				ensureSet(HerbariumDB, currentGatherCount + 1, playerName, "GATHERED", itemId)
 			end
 
 			checkAchievements()
@@ -630,12 +628,12 @@ function ensureGet(tbl, ...)
     return current
 end
 
-local function removeItem(playerName, section, itemID)
+local function removeItem(playerName, section, itemId)
     local playerData = HerbariumDB[playerName]
     if not playerData then return end	
 	if not playerData[section] then return end
 
-    playerData[section][itemID] = nil
+    playerData[section][itemId] = nil
 
 	-- Falls keine Items mehr da sind, lösche den Spieler
 	if next(playerData[section]) == nil then
@@ -673,10 +671,10 @@ function hasFinishedAchievement(professionRank)
 	end
 
 	-- for each herb with required skill lower or equal to Skillmax check DB for gathered
-	for _, herb in ipairs(Herbarium.herbalism) do
-		if herb[1] <= professionRankSkillmax then
+	for _, herb in ipairs(Herbarium.herbs) do
+		if herb.skill <= professionRankSkillmax then
 			local itemSlot = ensure(HerbariumDB, playerName, "GATHERED")
-			if not itemSlot[herb[4]] then
+			if not itemSlot[herb.itemId] then
 				finished = false
 				break
 			end
@@ -851,7 +849,7 @@ local function dump(o)
 end
 
 local function debug()
-	---[[
+	--[[
 	--debug event
 	--resetDB("Franzfrozt")
 	print(dump(HerbariumDB))
@@ -871,11 +869,12 @@ local function debug()
 
 	print(hasCompletedAchievement(APPRENTICE))
 	print(hasFinishedAchievement(APPRENTICE))
-	--updateAchievementFrame(Herbarium.herbalism[1][3],APPRENTICE)
+	
 	-- dump database
 	
 	--print(dump(Herbarium.L))
-	--]]
+	]]
+	updateAchievementFrame(Herbarium.herbs[1].icon,APPRENTICE)
 	
 	Herbarium:PrintChat("v" .. C_AddOns.GetAddOnMetadata("Herbarium","Version") .. " loaded.")
 end
@@ -888,7 +887,7 @@ SLASH_Herbarium1 = "/Herbarium"
 SLASH_Herbarium1 = "/herb"
 SlashCmdList["Herbarium"] = function()
     
-	--wdebug()
+	--debug()
        
     if Herbarium.frame and Herbarium.frame:IsShown() then
         HideUIPanel(Herbarium.frame)

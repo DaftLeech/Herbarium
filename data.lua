@@ -2,6 +2,275 @@ local _, herbariumData = ...
 
 Herbarium = Herbarium or {}
 
+Herbarium.herbs = {
+
+    {
+        skill = 1,
+        name = "Peacebloom",
+        icon = 133939,
+        itemId = 2447,
+        skillups = {orange = 1, yellow = 25, green = 50, grey = 100},
+        spawn = {"open"},
+    },
+
+    {
+        skill = 1,
+        name = "Silverleaf",
+        icon = 134190,
+        itemId = 765,
+        skillups = {orange = 1, yellow = 25, green = 50, grey = 100},
+        spawn = {"forest"},
+    },
+
+    {
+        skill = 15,
+        name = "Earthroot",
+        icon = 134187,
+        itemId = 2449,
+        skillups = {orange = 15, yellow = 40, green = 65, grey = 115},
+        spawn = {"cliff", "mountain"},
+    },
+
+    {
+        skill = 50,
+        name = "Mageroyal",
+        icon = 133436,
+        itemId = 785,
+        skillups = {orange = 50, yellow = 75, green = 100, grey = 150},
+        spawn = {"open"},
+    },
+
+    {
+        skill = 70,
+        name = "Briarthorn",
+        icon = 134412,
+        itemId = 2450,
+        skillups = {orange = 70, yellow = 95, green = 120, grey = 170},
+        spawn = {"forest"},
+    },
+
+    {
+        skill = 85,
+        name = "Stranglekelp",
+        icon = 134191,
+        itemId = 3820,
+        skillups = {orange = 85, yellow = 110, green = 135, grey = 185},
+        spawn = {"water"},
+    },
+
+    {
+        skill = 100,
+        name = "Bruiseweed",
+        icon = 134181,
+        itemId = 2453,
+        skillups = {orange = 100, yellow = 125, green = 150, grey = 200},
+        spawn = {"cliff", "open"},
+    },
+
+    {
+        skill = 115,
+        name = "Wild Steelbloom",
+        icon = 133938,
+        itemId = 3355,
+        skillups = {orange = 115, yellow = 140, green = 165, grey = 215},
+        spawn = {"cliff", "mountain"},
+    },
+
+    {
+        skill = 120,
+        name = "Grave Moss",
+        icon = 133849,
+        itemId = 3369,
+        skillups = {orange = 120, yellow = 145, green = 170, grey = 220},
+        spawn = {"cave"},
+    },
+
+    {
+        skill = 125,
+        name = "Kingsblood",
+        icon = 134183,
+        itemId = 3356,
+        skillups = {orange = 125, yellow = 150, green = 175, grey = 225},
+        spawn = {"open"},
+    },
+
+    {
+        skill = 150,
+        name = "Liferoot",
+        icon = 134413,
+        itemId = 3357,
+        skillups = {orange = 150, yellow = 175, green = 200, grey = 250},
+        spawn = {"water"},
+    },
+
+    {
+        skill = 160,
+        name = "Fadeleaf",
+        icon = 134193,
+        itemId = 3818,
+        skillups = {orange = 160, yellow = 185, green = 210, grey = 260},
+        spawn = {"forest"},
+    },
+
+    {
+        skill = 170,
+        name = "Goldthorn",
+        icon = 134196,
+        itemId = 3821,
+        skillups = {orange = 170, yellow = 195, green = 220, grey = 270},
+        spawn = {"cliff", "mountain"},
+    },
+
+    {
+        skill = 185,
+        name = "Khadgar's Whisker",
+        icon = 134188,
+        itemId = 3358,
+        skillups = {orange = 185, yellow = 210, green = 235, grey = 285},
+        spawn = {"forest"},
+    },
+
+    {
+        skill = 195,
+        name = "Wintersbite",
+        icon = 133940,
+        itemId = 3819,
+        skillups = {orange = 195, yellow = 220, green = 245, grey = 295},
+        spawn = {"open", "mountain"},
+    },
+
+    {
+        skill = 205,
+        name = "Firebloom",
+        icon = 134200,
+        itemId = 4625,
+        skillups = {orange = 205, yellow = 230, green = 255, grey = 305},
+        spawn = {"open", "desert"},
+    },
+
+    {
+        skill = 210,
+        name = "Purple Lotus",
+        icon = 134198,
+        itemId = 8831,
+        skillups = {orange = 210, yellow = 235, green = 260, grey = 310},
+        spawn = {"open", "jungle"},
+    },
+
+    {
+        skill = 220,
+        name = "Arthas' Tears",
+        icon = 134194,
+        itemId = 8836,
+        skillups = {orange = 220, yellow = 245, green = 270, grey = 320},
+        spawn = {"open"},
+    },
+
+    {
+        skill = 230,
+        name = "Sungrass",
+        icon = 134199,
+        itemId = 8838,
+        skillups = {orange = 230, yellow = 255, green = 280, grey = 330},
+        spawn = {"open", "jungle"},
+    },
+
+    {
+        skill = 235,
+        name = "Blindweed",
+        icon = 134195,
+        itemId = 8839,
+        skillups = {orange = 235, yellow = 260, green = 285, grey = 335},
+        spawn = {"water"},
+    },
+
+    {
+        skill = 245,
+        name = "Ghost Mushroom",
+        icon = 134529,
+        itemId = 8845,
+        skillups = {orange = 245, yellow = 270, green = 295, grey = 345},
+        spawn = {"cave"},
+    },
+
+    {
+        skill = 250,
+        name = "Gromsblood",
+        icon = 134197,
+        itemId = 8846,
+        skillups = {orange = 250, yellow = 275, green = 300, grey = 350},
+        spawn = {"open", "desert"},
+    },
+
+    {
+        skill = 260,
+        name = "Golden Sansam",
+        icon = 134221,
+        itemId = 13464,
+        skillups = {orange = 260, yellow = 285, green = 310, grey = 360},
+        spawn = {"open", "jungle"},
+    },
+
+    {
+        skill = 270,
+        name = "Dreamfoil",
+        icon = 134204,
+        itemId = 13463,
+        skillups = {orange = 270, yellow = 290, green = 315, grey = 370},
+        spawn = {"open", "jungle"},
+    },
+
+    {
+        skill = 280,
+        name = "Mountain Silversage",
+        icon = 134215,
+        itemId = 13465,
+        skillups = {orange = 280, yellow = 305, green = 330, grey = 380},
+        spawn = {"mountain", "cliff"},
+    },
+
+    {
+        skill = 285,
+        name = "Plaguebloom",
+        icon = 134219,
+        itemId = 13466,
+        skillups = {orange = 285, yellow = 310, green = 335, grey = 385},
+        spawn = {"open"},
+    },
+
+    {
+        skill = 290,
+        name = "Icecap",
+        icon = 134212,
+        itemId = 13467,
+        skillups = {orange = 290, yellow = 315, green = 340, grey = 390},
+        spawn = {"mountain", "cliff"},
+    },
+
+    {
+        skill = 300,
+        name = "Black Lotus",
+        icon = 134202,
+        itemId = 13468,
+        skillups = {orange = 300, yellow = 325, green = 350, grey = 400},
+        spawn = {"open"},
+    },
+
+}
+
+Herbarium.herbsByID = {}
+Herbarium.herbsByName = {}
+
+for _, herb in ipairs(Herbarium.herbs) do
+    Herbarium.herbsByID[herb.itemId] = herb
+    Herbarium.herbsByName[herb.name:lower()] = herb
+end
+
+table.sort(Herbarium.herbs, function(a, b)
+        return a.skill < b.skill
+    end)
+
+
 Herbarium.zoneLinks = {
     [765] = { -- Silverleaf
         {1413, 98}, -- The Barrens
@@ -197,9 +466,10 @@ Herbarium.zoneLinks = {
         {1447, 2}, -- Azshara
     },
     [4625] = { -- Firebloom
+        {1446, 62}, -- Tanaris
         {1427, 54}, -- Searing Gorge
         {1419, 43}, -- Blasted Lands
-        {1418, 21}, -- Badlands
+        {1418, 21}, -- Badlands        
     },
     [8831] = { -- Purple Lotus
         {1425, 34}, -- The Hinterlands
@@ -399,7 +669,16 @@ Herbarium.L = {
         ["Gathered"] = "Gathered",
         ["Herb Gathering"] = "Herb Gathering",
         ["Completed"] = "completed",
-        ["GatherFirst"] = "First time gathered: "
+        ["GatherFirst"] = "First time gathered: ",
+        ["spawn_open"]     = "Found in open terrain",
+        ["spawn_forest"]   = "Found in forested areas",
+        ["spawn_cliff"]    = "Grows in rocky or cliffside regions",
+        ["spawn_water"]    = "Found near water sources",
+        ["spawn_mountain"] = "Found in mountainous high-altitude areas",
+        ["spawn_cave"]     = "Found in caves or underground",
+        ["spawn_desert"]   = "Found in arid, desert-like regions",
+        ["spawn_jungle"]   = "Found in dense jungle vegetation"
+
 	}
 
 if GetLocale() == "deDE" then 
@@ -453,10 +732,10 @@ while countNil > 0 and maxtrys > 0 do
     
     countNil = 0
     maxtrys = maxtrys - 1
-    for _, herb in pairs(Herbarium.herbalism) do
+    for _, herb in pairs(Herbarium.herbs) do
         for name, translation in pairs(Herbarium.L) do
             if herb[2] == name then
-                local translatedName = C_Item.GetItemNameByID(herb[4])
+                local translatedName = C_Item.GetItemNameByID(herb.itemId)
                 if translatedName then 
                     Herbarium.L[name] = translatedName
                 else
