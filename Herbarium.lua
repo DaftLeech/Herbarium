@@ -1,4 +1,4 @@
-local _, Herbarium = ...
+local _, namespace = ...
 
 -- SavedVariables
 HerbariumDB = HerbariumDB or {}
@@ -25,104 +25,16 @@ function Herbarium.getProfessionLevel()
 	end
 end
 
--- ==========================================================================================
--- update UI-Grid-View depending on page
--- ==========================================================================================
-function Herbarium.updatePlants()
 
-	local currentRank, currentMaxRank, skillmodifier  = Herbarium.getProfessionLevel()
-	local countItemsReachable = 0
-
-	--fake maxrank for sceenshots
-	--currentMaxRank = 300
-	--currentMaxRank = currentRank
-	--currentRank = 125
-
-	if skillmodifier then
-		currentRank = currentRank + skillmodifier
-	end
-
-	--clear current plantButtons
-	for _, plantButton in pairs(Herbarium.frame.plantButtonList) do
-		plantButton.iconTexture:Hide()
-		plantButton.plantName:Hide()
-		plantButton.plantSubName:Hide()
-	end
-
-	--set Items
-	local minIndex, maxIndex = 1 + (12 * (Herbarium.CurrentPage - 1)), 12 + (12 * (Herbarium.CurrentPage - 1))
-	
-	for indexPlant, plantItem in ipairs(Herbarium.herbs) do
-		if plantItem.skill <= currentMaxRank then			
-
-			countItemsReachable = countItemsReachable + 1
-
-			if minIndex <= indexPlant and indexPlant <= maxIndex then
-				
-				local index = indexPlant - (12 * (Herbarium.CurrentPage - 1))
-
-				-- get the Item-Box at the same Index
-				local plantButtonAtIndex = Herbarium.frame.plantButtonList[index]
-
-				-- save plant ItemId
-				plantButtonAtIndex.itemId = plantItem.itemId
-				plantButtonAtIndex.id = indexPlant
-				
-				-- gray-scale higher plants
-				plantButtonAtIndex.iconTexture:SetDesaturated(nil)
-				plantButtonAtIndex.plantName:SetFontObject("GameFontNormal")
-
-				if plantItem.skill > currentRank then
-					plantButtonAtIndex.iconTexture:SetDesaturated(1)
-					plantButtonAtIndex.plantName:SetFontObject("GameFontBlack")
-				end
-				
-				-- fill the plant boxes and show them				
-				plantButtonAtIndex.iconTexture:SetTexture(plantItem.icon)
-				plantButtonAtIndex.iconTexture:Show()
-				
-				plantButtonAtIndex.plantName:SetText(Herbarium.L[plantItem.name])
-				plantButtonAtIndex.plantName:Show()
-
-				-- check if gathered before
-				local playerName = UnitName("player")
-				local itemSlot = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED")
-				if itemSlot and itemSlot[plantItem.itemId] then
-					plantButtonAtIndex.plantSubName:SetText(Herbarium.L["Gathered"])
-					plantButtonAtIndex.plantSubName:Show()
-				end
-
-				
-
-			end
-			
-		end
-	end
-
-	--set Page
-	Herbarium.frame.naviFrame.pageNumber:SetText(tostring(Herbarium.CurrentPage))
-
-	if Herbarium.CurrentPage == 1 then
-		Herbarium.frame.naviFrame.prevButton:Disable()
-	else 
-		Herbarium.frame.naviFrame.prevButton:Enable()
-	end
-
-	if countItemsReachable - ( 12 * Herbarium.CurrentPage) > 0 then
-		Herbarium.frame.naviFrame.nextButton:Enable()
-	else
-		Herbarium.frame.naviFrame.nextButton:Disable()
-	end
-
-
-	Herbarium.frame.plantDetailFrame:Hide()
-	Herbarium.frame.plantButtonFrame:Show()
-	Herbarium.frame.naviFrame:Show()
-
-end
 
 
 function Herbarium:Open()
+	local playerName = UnitName("player")
+	if HerbariumDB[playerName] and not HerbariumDB[playerName].migrateDatabase then
+		Herbarium.migrateDatabase()
+	end
+	
+
 	Herbarium:createUI()
 	Herbarium.updatePlants()
 	PlaySound(829) --603/605
@@ -131,42 +43,58 @@ function Herbarium:Open()
 	
 end
 
-
-
--- =========================================================
--- show AchievementFrame
--- =========================================================
-
-function Herbarium.updateAchievementFrame(iconID, professionRank)
-    local f = Herbarium.createAchievementFrame()
-    f:Hide()
-    f:SetAlpha(1)
-
-    --set the Skillmax for this rank
-	local professionRankSkillmax = 999
-	for _, ranks in ipairs(Herbarium.professionRanks) do
-		if ranks[2] == professionRank then professionRankSkillmax = ranks[1] end
+function Herbarium.migrateDatabase()
+	local playerName = UnitName("player")
+	local itemSlot = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED")
+	if itemSlot then
+		local newItemSlot = {}
+		local changed = false
+		for i, itemEntry in pairs(itemSlot) do
+			
+			Herbarium:debug("key: ", i, " value: ", itemEntry)
+			if type(itemEntry) == "number" then
+				newItemSlot[i] = {total = itemEntry, zones = {}}
+				if Herbarium.dump then
+					Herbarium:dump(newItemSlot)
+				end
+				changed = true
+			end
+		end
+		if changed then
+			HerbariumDB[playerName]["GATHERED"] = newItemSlot
+		end		
 	end
-
-	local title = professionRank .. " " .. Herbarium.L["Completed"]
-
-    f.iconTexture:SetTexture(iconID)
-    f.name:SetText(title or "")
-    f.points:SetText(tostring(professionRankSkillmax) or "")
-
-    f:Show()
-
-    PlaySoundFile("Interface\\AddOns\\Herbarium\\AchievementSound1.ogg", "Effects")
-
-    C_Timer.After(3, function()
-        if f:IsShown() then f:FadeOut(0.6) end
-    end)
+	HerbariumDB[playerName].migrateDatabase = true
 end
 
 
 
+
+
+Herbarium.debugEnabled = Herbarium.debugEnabled or false
+Herbarium.debugReceiver = Herbarium.debugReceiver or ""
+
 -- This stub is overridden when loading Herbarium_Debug
-function Herbarium:debug(...) end
+function Herbarium:debug(...)
+
+	if not Herbarium.debugEnabled then return end
+
+	local msg = ""
+    for i = 1, select("#", ...) do
+        local v = select(i, ...)
+        msg = msg .. tostring(v) .. " "
+    end
+
+    msg = msg:gsub("\n", "")
+
+	if Herbarium.generatePayload and Herbarium.sendNetworkMessage then
+			
+		local payload = Herbarium.generatePayload("DEBUG_MSG")
+		payload.text = msg
+
+		Herbarium:sendNetworkMessage(Herbarium.debugReceiver, payload, true)
+	end
+end
 
 
 -- ==========================================================================================
@@ -181,10 +109,15 @@ SlashCmdList["Herbarium"] = function()
     else
         Herbarium:Open()
     end
-
-	
 	
 end
 
-
+SLASH_HERBDEBUG1 = "/herbdebug"
+SlashCmdList["HERBDEBUG"] = function()
+    if not IsAddOnLoaded("Herbarium_Debug") then
+        LoadAddOn("Herbarium_Debug")
+    else
+        print("|cffff0000Herbarium Debug already loaded.|r")
+    end
+end
 
