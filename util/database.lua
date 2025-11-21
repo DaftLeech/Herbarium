@@ -1,4 +1,4 @@
-local addonName, Herbarium = ...
+local addonName, namespace = ...
 
 -- SavedVariables
 HerbariumDB = HerbariumDB or {}
@@ -36,7 +36,7 @@ function Herbarium.ensureGet(tbl, ...)
     local current = tbl
     for i = 1, #keys do
         if type(current) ~= "table" then
-            return nil
+            return current
         end
         current = current[keys[i]]
         if current == nil then
