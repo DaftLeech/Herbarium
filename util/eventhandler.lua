@@ -1,4 +1,4 @@
-local addonName, Herbarium = ...
+local addonName, namespace = ...
 
 -- SavedVariables
 HerbariumDB = HerbariumDB or {}
@@ -31,19 +31,24 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 		-- capture the GUID so we can detect it in SUCCEEDED event
 		Herbarium.CurrentPlantGUID = arg3
 
+		arg2 = arg2:gsub("’","'") 
+
 		-- capture localizated name for SUCCEEDED event 
 		Herbarium.CurrentPlantName = arg2
+		Herbarium:debug(Herbarium.CurrentPlantName)
 
 		-- target is localizated name of plant
 		-- get the english name so we can figure out the itemId
 		local plantNameEn = nil
 		for nameEn, nameLoc in pairs(Herbarium.L) do
-			if nameLoc == arg2 then
+			if nameLoc:lower() == arg2:lower() then
 				plantNameEn = nameEn:lower()
 			end
 		end
 
 		-- get the itemId
+		Herbarium:debug(plantNameEn)
+		
 		Herbarium.CurrentPlantItemId = Herbarium.herbsByName[plantNameEn].itemId
 		
 	end
@@ -53,6 +58,13 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 	-- arg2 = castGUID 
 	-- arg3 = spellId / 2366
 	if event == "UNIT_SPELLCAST_SUCCEEDED" then
+
+
+		-- search for herbs -> open ui
+		if arg3 == 2383 then 
+			Herbarium:Open()
+			return
+		end
 
 		-- different spells for different "ranks" ..
 			--local spellName = GetSpellInfo(arg3)
@@ -66,11 +78,26 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 
 			local playerName = UnitName(arg1)
 			local itemId = Herbarium.CurrentPlantItemId
-			
 
+			local mapId = C_Map.GetBestMapForUnit("player")
+			
+			while mapId and C_Map.GetMapInfo(mapId).mapType > 3 do
+				mapId = C_Map.GetMapInfo(mapId).parentMapID
+			end
+			Herbarium:debug(C_Map.GetMapInfo(mapId or 1).name)
+
+			-- TOTAL GATHERED
 			-- create entry in DB if not exists..
 			if not HerbariumDB[playerName] or not HerbariumDB[playerName]["GATHERED"] or not HerbariumDB[playerName]["GATHERED"][itemId] then
-				Herbarium.ensureSet(HerbariumDB, 1, playerName, "GATHERED", itemId)
+				local gatherLog = Herbarium.ensure(HerbariumDB, playerName, "GATHERED", itemId)
+				gatherLog.total = 1
+				gatherLog.zones = {}
+
+				if mapId then
+					gatherLog.zones[mapId] = {total = 1}
+				end
+
+				Herbarium.ensureSet(HerbariumDB, gatherLog, playerName, "GATHERED", itemId)
 
 				PlaySound(7355)
 				PlaySound(3093)--3093 (writing sound) / 7355 (tutorial pling)
@@ -80,9 +107,18 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 				
 			else 
 				-- .. else count up
-				local currentGatherCount = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED", itemId)
-				Herbarium.ensureSet(HerbariumDB, currentGatherCount + 1, playerName, "GATHERED", itemId)
+				local currentGatherLog = Herbarium.ensure(HerbariumDB, playerName, "GATHERED", itemId)
+				currentGatherLog.total = currentGatherLog.total + 1
+
+				if mapId then
+					currentGatherLog.zones[mapId] = currentGatherLog.zones[mapId] or {total = 0}
+					currentGatherLog.zones[mapId].total = (currentGatherLog.zones[mapId].total or 0) + 1
+				end
+
+				Herbarium.ensureSet(HerbariumDB, currentGatherLog, playerName, "GATHERED", itemId)
 			end
+
+			
 
 			Herbarium.checkAchievements()
 			
@@ -96,3 +132,5 @@ local f = CreateFrame("Frame")
 f:RegisterEvent("UNIT_SPELLCAST_SENT")
 f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 f:SetScript("OnEvent", Herbarium.handleEvent)
+
+Herbarium.eventFrame = f
