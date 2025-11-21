@@ -1,4 +1,4 @@
-local addonName, Herbarium = ...
+local addonName, namespace = ...
 
 -- SavedVariables
 HerbariumDB = HerbariumDB or {}
@@ -216,23 +216,43 @@ function Herbarium:createUI()
 	end)
 	plantDetailFrame.plantButton1.plantName:SetFontObject("GameFontNormalLarge")
 	plantDetailFrame.plantButton1.plantName:SetSize(250, 0)
+	plantDetailFrame.plantButton1.plantSubName:SetFontObject("GameFontNormal")
+	plantDetailFrame.plantButton1.plantSubName:SetSize(250, 0)
+
+	plantDetailFrame.foundRegion = plantDetailFrame:CreateFontString(nil, "BORDER")
+	plantDetailFrame.foundRegion:SetFontObject("QuestFont")
+	plantDetailFrame.foundRegion:SetMaxLines(3)
+	plantDetailFrame.foundRegion:SetJustifyH("LEFT")
+	plantDetailFrame.foundRegion:SetSize(300, 0)
+	plantDetailFrame.foundRegion:SetPoint("TOPLEFT", plantDetailFrame.plantButton1, "BOTTOMLEFT", 0, -14)
+	plantDetailFrame.foundRegion:SetText("")
+	plantDetailFrame.foundRegion:Hide()
 
 	plantDetailFrame.zonesTitle = plantDetailFrame:CreateFontString(nil, "BORDER")
 	plantDetailFrame.zonesTitle:SetFontObject("QuestTitleFont")
 	plantDetailFrame.zonesTitle:SetMaxLines(2)
 	plantDetailFrame.zonesTitle:SetJustifyH("LEFT")
 	plantDetailFrame.zonesTitle:SetSize(300, 0)
-	plantDetailFrame.zonesTitle:SetPoint("TOPLEFT", plantDetailFrame.plantButton1, "BOTTOMLEFT", 0, -14)
-	plantDetailFrame.zonesTitle:SetText("Zones")
+	plantDetailFrame.zonesTitle:SetPoint("TOPLEFT", plantDetailFrame.foundRegion, "BOTTOMLEFT", 0, -14)
+	plantDetailFrame.zonesTitle:SetText(Herbarium.L["knownZones"])
 
 	plantDetailFrame.zones = plantDetailFrame:CreateFontString(nil, "BORDER")
 	plantDetailFrame.zones:SetFontObject("QuestFont")
 	plantDetailFrame.zones:SetMaxLines(10)
 	plantDetailFrame.zones:SetJustifyH("LEFT")
-	plantDetailFrame.zones:SetSize(300, 0)
+	plantDetailFrame.zones:SetSize(255, 0)
 	plantDetailFrame.zones:SetPoint("TOPLEFT", plantDetailFrame.zonesTitle, "BOTTOMLEFT", 0, -14)
 	plantDetailFrame.zones:SetText("")
 	plantDetailFrame.zones:Hide()
+
+	plantDetailFrame.zonesCount = plantDetailFrame:CreateFontString(nil, "BORDER")
+	plantDetailFrame.zonesCount:SetFontObject("QuestFont")
+	plantDetailFrame.zonesCount:SetMaxLines(10)
+	plantDetailFrame.zonesCount:SetJustifyH("RIGHT")
+	--plantDetailFrame.zonesCount:SetSize(40, 0)
+	plantDetailFrame.zonesCount:SetPoint("TOPLEFT", plantDetailFrame.zones, "TOPRIGHT", 0, 0)
+	plantDetailFrame.zonesCount:SetText("")
+	plantDetailFrame.zonesCount:Hide()
 
 	plantDetailFrame:Hide()
 
@@ -286,7 +306,7 @@ function Herbarium:plantButtonTemplate(name, parent)
 	-- set Tooltip
 	f:SetScript("OnEnter", function (self, motion)
 		
-		if self.id == 0 then return end
+		if self.itemId == 0 then return end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")	
 		GameTooltip:SetItemByID(self.itemId)--		
 		CursorUpdate(self)
@@ -314,27 +334,78 @@ function onPlantDetailsClick(plantButton, button, down)
     local plantItemId     = plantItem.itemId -- plant ItemId / object.id
     local plantDetailBtn  = Herbarium.frame.plantDetailFrame.plantButton1 --button in detail frame
     local zones           = Herbarium.frame.plantDetailFrame.zones
+	local zonesCount      = Herbarium.frame.plantDetailFrame.zonesCount
+	local foundRegion     = Herbarium.frame.plantDetailFrame.foundRegion
+
+	local playerName = UnitName("player")
 
     plantDetailBtn.id         = plantIndex
     plantDetailBtn.itemId     = plantItemId
     plantDetailBtn.iconTexture:SetTexture(plantItem.icon)
     plantDetailBtn.iconTexture:Show()
-    plantDetailBtn.plantName:SetText(C_Item.GetItemNameByID(plantItemId))
+    plantDetailBtn.plantName:SetText(Herbarium.L[plantItem.name])
     plantDetailBtn.plantName:Show()
+	plantDetailBtn.plantSubName:SetText("|cFFFFA500"..tostring(plantItem.skillups.orange)..
+	"|r".." | ".."|cFFFFFF00"..tostring(plantItem.skillups.yellow).."|r".." | ".."|cFF008000"..tostring(plantItem.skillups.green).."|r"
+	.." | ".."|cFF808080"..tostring(plantItem.skillups.grey).."|r")
+	plantDetailBtn.plantSubName:Show()
+
+
+	foundRegion:SetText("")
+	for _, region in pairs(plantItem.spawn) do
+		Herbarium:debug("Region: ", region)
+		local regionText = Herbarium.L["spawn_"..region]
+		Herbarium:debug("Region: ", regionText)
+		if not foundRegion:GetText() then
+			foundRegion:SetText(regionText)
+		else
+			foundRegion:SetText(foundRegion:GetText().." "..Herbarium.L["spawn_connect"]..regionText:gsub(Herbarium.L["spawn_found"],""))
+		end
+	end
+	foundRegion:Show()
+
+	local textWidthFont = Herbarium.frame.plantDetailFrame:CreateFontString(nil, "BORDER")
+	textWidthFont:SetFontObject("QuestFont")
+
+	textWidthFont:SetText(".")
+	local dotWidth = textWidthFont:GetStringWidth()
 
     zones:SetText("")
+	zonesCount:SetText("")
     local countPrint = 1
 
     for _, zone in pairs(Herbarium.zoneLinks[plantItemId]) do
-        if countPrint <= 20 then
+        if countPrint <= 10 then
             if C_MapExplorationInfo.GetExploredMapTextures(zone[1]) then
                 countPrint = countPrint + 1
                 local mapInfo = C_Map.GetMapInfo(zone[1])
+				local totalGatheredInZone = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED", plantItemId, "zones", zone[1], "total")
+				Herbarium:debug("mapName: ", mapInfo.name, " mapId: ", mapInfo.mapID)
+				Herbarium:debug("totalGatheredInZone: ",totalGatheredInZone)
+
+				local totalWidth = 250
+				textWidthFont:SetText(mapInfo.name)
+				local currentWidth = textWidthFont:GetStringWidth()
+				textWidthFont:SetText(tostring(totalGatheredInZone or 0))
+				local countWidth = textWidthFont:GetStringWidth()
+				
+
+				local totalDots = (totalWidth - currentWidth ) / dotWidth
+				local dotString = "."
+
+				Herbarium:debug("totalWidth: ",totalWidth, " currentWidth: ", currentWidth, " countWidth: ", countWidth, " dotWidth: ", dotWidth, " totalDots: ", totalDots)
+
+				for i = 1, totalDots do
+					dotString = dotString .. "."
+				end
+
                 if mapInfo then
                     if not zones:GetText() then
-                        zones:SetText(mapInfo.name)
+                        zones:SetText(mapInfo.name .. dotString)
+						zonesCount:SetText(tostring(totalGatheredInZone or 0))
                     else
-                        zones:SetText(zones:GetText() .. "\n" .. mapInfo.name)
+                        zones:SetText(zones:GetText() .. "\n" .. mapInfo.name .. dotString)
+						zonesCount:SetText(zonesCount:GetText() .. "\n" .. tostring(totalGatheredInZone or 0))
                     end
                 end
             end
@@ -342,6 +413,7 @@ function onPlantDetailsClick(plantButton, button, down)
     end
 
     zones:Show()
+	zonesCount:Show()
     PlaySound(829)
     Herbarium.frame.plantButtonFrame:Hide()
     Herbarium.frame.naviFrame:Hide()
@@ -361,4 +433,106 @@ function onNextPageClick()
         Herbarium.CurrentPage = Herbarium.CurrentPage + 1
         Herbarium:updatePlants()
     end
+end
+
+-- ==========================================================================================
+-- update UI-Grid-View depending on page
+-- ==========================================================================================
+function Herbarium.updatePlants()
+
+	local currentRank, currentMaxRank, skillmodifier  = Herbarium.getProfessionLevel()
+	local countItemsReachable = 0
+
+	if not currentMaxRank then 
+		HideUIPanel(Herbarium.frame)
+		return
+	 end
+
+	--fake maxrank for sceenshots
+	--currentMaxRank = 300
+	--currentMaxRank = currentRank
+	--currentRank = 125
+
+	if skillmodifier then
+		currentRank = currentRank + skillmodifier
+	end
+
+	--clear current plantButtons
+	for _, plantButton in pairs(Herbarium.frame.plantButtonList) do
+		plantButton.iconTexture:Hide()
+		plantButton.plantName:Hide()
+		plantButton.plantSubName:Hide()
+		plantButton.itemId = 0
+	end
+
+	--set Items
+	local minIndex, maxIndex = 1 + (12 * (Herbarium.CurrentPage - 1)), 12 + (12 * (Herbarium.CurrentPage - 1))
+	
+	for indexPlant, plantItem in ipairs(Herbarium.herbs) do
+		if plantItem.skill <= currentMaxRank then			
+
+			countItemsReachable = countItemsReachable + 1
+
+			if minIndex <= indexPlant and indexPlant <= maxIndex then
+				
+				local index = indexPlant - (12 * (Herbarium.CurrentPage - 1))
+
+				-- get the Item-Box at the same Index
+				local plantButtonAtIndex = Herbarium.frame.plantButtonList[index]
+
+				-- save plant ItemId
+				plantButtonAtIndex.itemId = plantItem.itemId
+				plantButtonAtIndex.id = indexPlant
+				
+				-- gray-scale higher plants
+				plantButtonAtIndex.iconTexture:SetDesaturated(nil)
+				plantButtonAtIndex.plantName:SetFontObject("GameFontNormal")
+
+				if plantItem.skill > currentRank then
+					plantButtonAtIndex.iconTexture:SetDesaturated(1)
+					plantButtonAtIndex.plantName:SetFontObject("GameFontBlack")
+				end
+				
+				-- fill the plant boxes and show them				
+				plantButtonAtIndex.iconTexture:SetTexture(plantItem.icon)
+				plantButtonAtIndex.iconTexture:Show()
+				
+				plantButtonAtIndex.plantName:SetText(Herbarium.L[plantItem.name])
+				plantButtonAtIndex.plantName:Show()
+
+				-- check if gathered before
+				local playerName = UnitName("player")
+				local itemSlot = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED")
+				if itemSlot and itemSlot[plantItem.itemId] then
+					plantButtonAtIndex.plantSubName:SetText(Herbarium.L["Gathered"])
+					plantButtonAtIndex.plantSubName:Show()
+				end
+
+				
+
+			end
+			
+		end
+	end
+
+	--set Page
+	Herbarium.frame.naviFrame.pageNumber:SetText(tostring(Herbarium.CurrentPage))
+
+	if Herbarium.CurrentPage == 1 then
+		Herbarium.frame.naviFrame.prevButton:Disable()
+	else 
+		Herbarium.frame.naviFrame.prevButton:Enable()
+	end
+
+	if countItemsReachable - ( 12 * Herbarium.CurrentPage) > 0 then
+		Herbarium.frame.naviFrame.nextButton:Enable()
+	else
+		Herbarium.frame.naviFrame.nextButton:Disable()
+	end
+
+
+	Herbarium.frame.plantDetailFrame:Hide()
+	Herbarium.frame.plantButtonFrame:Show()
+	Herbarium.frame.naviFrame:Show()
+
 end
