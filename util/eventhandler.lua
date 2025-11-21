@@ -84,7 +84,8 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 			while mapId and C_Map.GetMapInfo(mapId).mapType > 3 do
 				mapId = C_Map.GetMapInfo(mapId).parentMapID
 			end
-			Herbarium:debug(C_Map.GetMapInfo(mapId or 1).name)
+			
+			--Herbarium:debug(C_Map.GetMapInfo(mapId or 1).name)
 
 			-- TOTAL GATHERED
 			-- create entry in DB if not exists..
