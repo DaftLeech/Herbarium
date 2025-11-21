@@ -1,4 +1,4 @@
-local _, Herbarium = ...
+local _, namespace = ...
 
 Herbarium = Herbarium or {}
 
@@ -539,12 +539,16 @@ Herbarium.zoneLinks = {
         {1422, 77}, -- Western Plaguelands
         {1448, 63}, -- Felwood
     },
+    [13467] = { -- Icecap
+        {1452, 153} -- Winterspring
+    },
     [13468] = { -- Black Lotus
         {1452, 15}, -- Winterspring
         {1423, 10}, -- Eastern Plaguelands
         {1451, 6}, -- Silithus
     },
 }
+--[[
 
 Herbarium.herbalism = {
     {1,   "Peacebloom",             133939,  2447},
@@ -576,6 +580,9 @@ Herbarium.herbalism = {
     {290, "Icecap",                 134212,  13467},
     {300, "Black Lotus",            134202,  13468},
 }
+
+]]
+
 
 Herbarium.zones = {
     {1411, "Durotar"},
@@ -670,9 +677,12 @@ Herbarium.L = {
         ["Herb Gathering"] = "Herb Gathering",
         ["Completed"] = "completed",
         ["GatherFirst"] = "First time gathered: ",
+        ["knownZones"] = "Known zones",
+        ["spawn_found"] = "Found",
+        ["spawn_connect"] = "and",
         ["spawn_open"]     = "Found in open terrain",
         ["spawn_forest"]   = "Found in forested areas",
-        ["spawn_cliff"]    = "Grows in rocky or cliffside regions",
+        ["spawn_cliff"]    = "Found in rocky or cliffside regions",
         ["spawn_water"]    = "Found near water sources",
         ["spawn_mountain"] = "Found in mountainous high-altitude areas",
         ["spawn_cave"]     = "Found in caves or underground",
@@ -722,6 +732,17 @@ if GetLocale() == "deDE" then
     L["Herb Gathering"] = "Kr\195\164utersammeln"
     L["Completed"] = "abgeschlossen"
     L["GatherFirst"] = "Zum ersten mal gesammelt: "
+    L["knownZones"] = "Bekannte Zonen"
+    L["spawn_found"] = "Aufzufinden"
+    L["spawn_connect"] = "und"
+    L["spawn_open"]     = "Aufzufinden in offenem Terrain"
+    L["spawn_forest"]   = "Aufzufinden in Waldgebieten"
+    L["spawn_cliff"]    = "Aufzufinden in steinigen oder Klippen-Regionen"
+    L["spawn_water"]    = "Aufzufinden in der N\195\164he von Wasserquellen"
+    L["spawn_mountain"] = "Aufzufinden in gebirgigen hoch gelegenen Arealen"
+    L["spawn_cave"]     = "Aufzufinden in H\195\182hlen oder unterirdisch"
+    L["spawn_desert"]   = "Aufzufinden in trockenen, wüsten \195\164hnlichen Regionen"
+    L["spawn_jungle"]   = "Aufzufinden in dichter Jungle-Vegetation"
 
 end
 
