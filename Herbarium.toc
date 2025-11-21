@@ -13,3 +13,4 @@ userinterface\herbariumAchievement.lua
 
 Herbarium.lua
 util\eventhandler.lua
+#util\network.lua
