@@ -1,4 +1,4 @@
-local addonName, Herbarium = ...
+local addonName, namespace = ...
 
 -- SavedVariables
 HerbariumDB = HerbariumDB or {}
@@ -55,9 +55,39 @@ function Herbarium.checkAchievements()
 end
 
 -- =========================================================
+-- show AchievementFrame
+-- =========================================================
+
+function Herbarium.updateAchievementFrame(iconID, professionRank)
+    local f = Herbarium.createAchievementFrame()
+    f:Hide()
+    f:SetAlpha(1)
+
+    --set the Skillmax for this rank
+	local professionRankSkillmax = 999
+	for _, ranks in ipairs(Herbarium.professionRanks) do
+		if ranks[2] == professionRank then professionRankSkillmax = ranks[1] end
+	end
+
+	local title = professionRank .. " " .. Herbarium.L["Completed"]
+
+    f.iconTexture:SetTexture(iconID)
+    f.name:SetText(title or "")
+    f.points:SetText(tostring(professionRankSkillmax) or "")
+
+    f:Show()
+
+    PlaySoundFile("Interface\\AddOns\\Herbarium\\AchievementSound1.ogg", "Effects")
+
+    C_Timer.After(3, function()
+        if f:IsShown() then f:FadeOut(0.6) end
+    end)
+end
+
+-- =========================================================
 -- Achievement UI
 -- =========================================================
-function createAchievementFrame()
+function Herbarium.createAchievementFrame()
     if Herbarium.achievementFrame then
         return Herbarium.achievementFrame
     end
