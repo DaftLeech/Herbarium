@@ -61,7 +61,7 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 
 
 		-- search for herbs -> open ui
-		if arg3 == 2383 then 
+		if arg3 == 2383 and arg1 == "player" then 
 			Herbarium:Open()
 			return
 		end
