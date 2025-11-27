@@ -374,12 +374,24 @@ function onPlantDetailsClick(plantButton, button, down)
 	zonesCount:SetText("")
     local countPrint = 1
 
-    for _, zone in pairs(Herbarium.zoneLinks[plantItemId]) do
+    for _, zoneLink in pairs(Herbarium.zoneLinks[plantItemId]) do
+		local zoneId = zoneLink[1]
+		local zoneObj = Herbarium.zones[zoneId]
+		local zoneParent = nil
+		if #zoneObj == 2 then
+			zoneParent = zoneObj[2]
+		end
         if countPrint <= 10 then
-            if C_MapExplorationInfo.GetExploredMapTextures(zone[1]) then
+            if C_MapExplorationInfo.GetExploredMapTextures(zoneId) or (zoneParent and C_MapExplorationInfo.GetExploredMapTextures(zoneParent)) then
                 countPrint = countPrint + 1
-                local mapInfo = C_Map.GetMapInfo(zone[1])
-				local totalGatheredInZone = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED", plantItemId, "zones", zone[1], "total")
+                local mapInfo = C_Map.GetMapInfo(zoneId)
+				if not mapInfo then
+					local name, instanceID = Herbarium.L[zoneObj[1]], zoneId
+					mapInfo = {}
+					mapInfo.name = name
+					mapInfo.mapID = instanceID
+				end
+				local totalGatheredInZone = Herbarium.ensureGet(HerbariumDB, playerName, "GATHERED", plantItemId, "zones", zoneId, "total")
 				Herbarium:debug("mapName: ", mapInfo.name, " mapId: ", mapInfo.mapID)
 				Herbarium:debug("totalGatheredInZone: ",totalGatheredInZone)
 

@@ -84,6 +84,10 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 			while mapId and C_Map.GetMapInfo(mapId).mapType > 3 do
 				mapId = C_Map.GetMapInfo(mapId).parentMapID
 			end
+			if not mapId then
+				local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+				mapId = instanceID
+			end
 			
 			--Herbarium:debug(C_Map.GetMapInfo(mapId or 1).name)
 
