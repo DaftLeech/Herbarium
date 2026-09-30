@@ -21,9 +21,9 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 	-- arg4 = spellId / 2366
 	if event == "UNIT_SPELLCAST_SENT" and arg1 == "player" then
 		
-		-- different spells for different "diffeculties"
+		-- different spells for different "difficulties"
 			--local spellName = GetSpellInfo(arg4)
-			--if Herbarium.L["Herb Gathering"] ~= spellName then return end 
+			--if Herbarium.L["Herb Gathering"] ~= spellName then return end
 
 		-- .. or always 2366?
 		if arg4 ~= 2366 then return end
@@ -33,11 +33,11 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 
 		arg2 = arg2:gsub("’","'") 
 
-		-- capture localizated name for SUCCEEDED event 
+		-- capture localized name for SUCCEEDED event
 		Herbarium.CurrentPlantName = arg2
 		Herbarium:debug(Herbarium.CurrentPlantName)
 
-		-- target is localizated name of plant
+		-- target is localized name of plant
 		-- get the english name so we can figure out the itemId
 		local plantNameEn = nil
 		for nameEn, nameLoc in pairs(Herbarium.L) do
@@ -55,25 +55,25 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 
 	-- spell=2366/herb-gathering
 	-- arg1 = unit / "player"
-	-- arg2 = castGUID 
+	-- arg2 = castGUID
 	-- arg3 = spellId / 2366
 	if event == "UNIT_SPELLCAST_SUCCEEDED" then
 
 
 		-- search for herbs -> open ui
-		if arg3 == 2383 and arg1 == "player" then 
+		if arg3 == 2383 and arg1 == "player" then
 			Herbarium:Open()
 			return
 		end
 
 		-- different spells for different "ranks" ..
 			--local spellName = GetSpellInfo(arg3)
-			--if Herbarium.L["Herb Gathering"] ~= spellName then return end 
+			--if Herbarium.L["Herb Gathering"] ~= spellName then return end
 
 		-- .. or always 2366?
 		if arg3 ~= 2366 then return end
 
-		-- same GUID as in before? we continue 
+		-- same GUID as in before? we continue
 		if arg2 == Herbarium.CurrentPlantGUID and arg1 == "player" then
 
 			local playerName = UnitName(arg1)

@@ -1,9 +1,15 @@
-## Interface: 11508
+## Interface: 16001
 ## Title: Herbarium
-## Notes: Trackt Kräuter
+## Notes: Track Herbs
 ## Author: DaftLeech
-## Version: 1.20.0
+## Version: 1.21.0
 ## SavedVariables: HerbariumDB
+## AllowLoadGameType: standard, camelot
+
+Libs\\LibStub.lua
+Libs\\CallbackHandler-1.0\\CallbackHandler-1.0.lua
+Libs\\LibDataBroker-1.1\\LibDataBroker-1.1.lua
+Libs\\LibDBIcon-1.0\\LibDBIcon-1.0.lua
 
 data.lua
 util\database.lua
@@ -12,5 +18,6 @@ userinterface\herbariumFrame.lua
 userinterface\herbariumAchievement.lua
 
 Herbarium.lua
+minimap.lua
 util\eventhandler.lua
 #util\network.lua

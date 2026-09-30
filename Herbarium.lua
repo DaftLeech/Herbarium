@@ -14,7 +14,7 @@ end
 -- ==========================================================================================
 -- profession level by name..
 -- ==========================================================================================
-function Herbarium.getProfessionLevel()				
+function Herbarium.getProfessionLevel()
 	local numSkills = GetNumSkillLines();
 	for i=1, numSkills do
 		local skillname,_,_,skillrank,_,skillmodifier, skillMaxRank = GetSkillLineInfo(i)		
