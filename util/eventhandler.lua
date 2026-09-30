@@ -5,6 +5,10 @@ HerbariumDB = HerbariumDB or {}
 Herbarium = Herbarium or {}
 
 local FIND_HERBS_SPELL_ID = 2383
+local HERB_GATHERING_SPELL_ID = 2366
+local GATHER_WINDOW_SECONDS = 3
+
+local gatherPendingUntil = nil
 
 -- Loot is cached when it becomes available and only recorded when the slot is
 -- actually cleared. This avoids counting herbs that were seen but not looted.
@@ -134,6 +138,16 @@ end
 
 function Herbarium.handleEvent(self, event, ...)
     if event == "LOOT_READY" then
+        if not gatherPendingUntil or GetTime() > gatherPendingUntil then
+            gatherPendingUntil = nil
+            clearTable(pendingGatherLoot)
+            clearTable(gatheredThisLoot)
+            return
+        end
+
+        -- Consume the gathering context immediately so an unrelated loot window
+        -- cannot reuse the same successful Herbalism cast.
+        gatherPendingUntil = nil
         cacheGatherLoot()
         return
     end
@@ -159,6 +173,7 @@ function Herbarium.handleEvent(self, event, ...)
     end
 
     if event == "LOOT_CLOSED" then
+        gatherPendingUntil = nil
         clearTable(pendingGatherLoot)
         clearTable(gatheredThisLoot)
         return
@@ -167,8 +182,19 @@ function Herbarium.handleEvent(self, event, ...)
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unitTarget, _, spellID = ...
 
+        if unitTarget ~= "player" then
+            return
+        end
+
+        -- The successful Herbalism gather cast gates the next loot window.
+        if spellID == HERB_GATHERING_SPELL_ID then
+            gatherPendingUntil = GetTime() + GATHER_WINDOW_SECONDS
+            Herbarium:debug("Herbalism gather succeeded, spellID: ", spellID)
+            return
+        end
+
         -- Keep the existing convenience behavior: using Find Herbs opens Herbarium.
-        if unitTarget == "player" and spellID == FIND_HERBS_SPELL_ID then
+        if spellID == FIND_HERBS_SPELL_ID then
             Herbarium:Open()
         end
     end
