@@ -27,7 +27,7 @@ local launcher = LDB:NewDataObject(OBJECT_NAME, {
   type = "launcher",
   label = "Herbarium",
   text = "Herbarium",
-  icon = "Interface\\MINIMAP\\Dungeon",
+  icon = "Interface\\ICONS\\INV_Misc_Herb_02",
 
   OnClick = function(_, button)
     if button == "LeftButton" and Herbarium then

@@ -31,7 +31,7 @@ function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
 		-- capture the GUID so we can detect it in SUCCEEDED event
 		Herbarium.CurrentPlantGUID = arg3
 
-		arg2 = arg2:gsub("’","'") 
+		arg2 = arg2:gsub("’","'")
 
 		-- capture localized name for SUCCEEDED event
 		Herbarium.CurrentPlantName = arg2

@@ -5,6 +5,7 @@
 ## Version: 1.21.0
 ## SavedVariables: HerbariumDB
 ## AllowLoadGameType: standard, camelot
+## IconTexture: Interface\ICONS\INV_Misc_Herb_02
 
 Libs\\LibStub.lua
 Libs\\CallbackHandler-1.0\\CallbackHandler-1.0.lua
