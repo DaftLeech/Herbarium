@@ -1,6 +1,6 @@
 local _, namespace = ...
 
-Herbarium = Herbarium or {}
+_G.Herbarium = Herbarium or {}
 
 Herbarium.herbs = {
 
@@ -828,11 +828,21 @@ Herbarium.L = {
         ["Dire Maul"] = "Dire Maul",
         ["Scarlet Halls"] = "Scarlet Halls",
         ["Scarlet Monastery"] = "Scarlet Monastery",
-        ["Scholomance"] = "Scholomance"
+        ["Scholomance"] = "Scholomance",
+
+        ["TheHallOfThanes"] = "Hall of Thanes",
+        ["TheRuinsOfLordaeron"] = "Ruins of Lordaeron",
+        ["ExcavationSiteWetlands"]= "Excavation Site: Wetlands",
+        ["CityOfDalaran"] = "City of Dalaran",
+        ["TheDrownedCity"] = "The Drowned City",
+        ["KroldokStronghold"] = "Krol'dok Stronghold",
+        ["AlcazPrison"] = "Alcaz Prison",
+        ["BlackmawHold"] = "Blackmaw Hold",
+        ["ShapersTerrace"] = "Shaper's Terrace"
 
 	}
 
-if GetLocale() == "deDE" then 
+if GetLocale() == "deDE" then
 
 	local L = Herbarium.L
 
@@ -899,7 +909,7 @@ if GetLocale() == "deDE" then
     L["Blackrock Spire"] = "Schwarzfelsspitze"
     L["Blackrock Depths"] = "Blackrocktiefen"
     L["Stratholme"] = "Stratholme"
-    L["Maraudon"] = "Maraudon" 
+    L["Maraudon"] = "Maraudon"
     L["Ragefire Chasm"] = "Ragefireabgrund"
     L["Dire Maul"] = "D\195\188sterbruch"
     L["Scarlet Halls"] = "Das Scharlachrote Kloster - Eingang"
