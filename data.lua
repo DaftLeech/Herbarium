@@ -259,11 +259,9 @@ Herbarium.herbs = {
 }
 
 Herbarium.herbsByID = {}
-Herbarium.herbsByName = {}
 
 for _, herb in ipairs(Herbarium.herbs) do
     Herbarium.herbsByID[herb.itemId] = herb
-    Herbarium.herbsByName[herb.name:lower()] = herb
 end
 
 table.sort(Herbarium.herbs, function(a, b)

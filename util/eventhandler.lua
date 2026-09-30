@@ -4,137 +4,180 @@ local addonName, namespace = ...
 HerbariumDB = HerbariumDB or {}
 Herbarium = Herbarium or {}
 
--- ==========================================================================================
--- handle events
--- ==========================================================================================
+local FIND_HERBS_SPELL_ID = 2383
 
-Herbarium.CurrentPlantGUID = nil
-Herbarium.CurrentPlantItemId = nil
-Herbarium.CurrentPlantName = nil
+-- Loot is cached when it becomes available and only recorded when the slot is
+-- actually cleared. This avoids counting herbs that were seen but not looted.
+local pendingGatherLoot = {}
+local gatheredThisLoot = {}
 
-function Herbarium.handleEvent(self, event, arg1, arg2, arg3, arg4, arg5)
+local function clearTable(tbl)
+    for key in pairs(tbl) do
+        tbl[key] = nil
+    end
+end
 
-	-- spell=2366/herb-gathering
-	-- arg1 = unit / "player"
-	-- arg2 = target / "Peacebloom"
-	-- arg3 = castGUID 
-	-- arg4 = spellId / 2366
-	if event == "UNIT_SPELLCAST_SENT" and arg1 == "player" then
-		
-		-- different spells for different "difficulties"
-			--local spellName = GetSpellInfo(arg4)
-			--if Herbarium.L["Herb Gathering"] ~= spellName then return end
+local function getGatherMapID()
+    local mapID = C_Map.GetBestMapForUnit("player")
 
-		-- .. or always 2366?
-		if arg4 ~= 2366 then return end
+    -- Normalize sub-zones to the same map level Herbarium historically stored.
+    while mapID do
+        local mapInfo = C_Map.GetMapInfo(mapID)
+        if not mapInfo or mapInfo.mapType <= 3 then
+            break
+        end
 
-		-- capture the GUID so we can detect it in SUCCEEDED event
-		Herbarium.CurrentPlantGUID = arg3
+        mapID = mapInfo.parentMapID
+    end
 
-		arg2 = arg2:gsub("’","'")
+    if not mapID then
+        local _, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+        mapID = instanceID
+    end
 
-		-- capture localized name for SUCCEEDED event
-		Herbarium.CurrentPlantName = arg2
-		Herbarium:debug(Herbarium.CurrentPlantName)
+    return mapID
+end
 
-		-- target is localized name of plant
-		-- get the english name so we can figure out the itemId
-		local plantNameEn = nil
-		for nameEn, nameLoc in pairs(Herbarium.L) do
-			if nameLoc:lower() == arg2:lower() then
-				plantNameEn = nameEn:lower()
-			end
-		end
+local function getGameObjectSourceGUID(lootSlot)
+    local sources = { GetLootSourceInfo(lootSlot) }
 
-		-- get the itemId
-		Herbarium:debug(plantNameEn)
-		
-		Herbarium.CurrentPlantItemId = Herbarium.herbsByName[plantNameEn].itemId
-		
-	end
+    -- GetLootSourceInfo returns GUID/quantity pairs. Resource nodes such as
+    -- herbs are GameObjects; creature loot therefore does not get tracked.
+    for i = 1, #sources, 2 do
+        local sourceGUID = sources[i]
+        if type(sourceGUID) == "string" and sourceGUID:sub(1, 11) == "GameObject-" then
+            return sourceGUID
+        end
+    end
+end
 
-	-- spell=2366/herb-gathering
-	-- arg1 = unit / "player"
-	-- arg2 = castGUID
-	-- arg3 = spellId / 2366
-	if event == "UNIT_SPELLCAST_SUCCEEDED" then
+local function cacheGatherLoot()
+    clearTable(pendingGatherLoot)
+    clearTable(gatheredThisLoot)
 
+    -- Do not track herb items unless this character actually knows Herbalism.
+    if not Herbarium.getProfessionLevel() then
+        return
+    end
 
-		-- search for herbs -> open ui
-		if arg3 == 2383 and arg1 == "player" then
-			Herbarium:Open()
-			return
-		end
+    for lootSlot = 1, GetNumLootItems() do
+        if LootSlotHasItem(lootSlot) then
+            local itemLink = GetLootSlotLink(lootSlot)
+            local itemID = itemLink and C_Item.GetItemIDForItemInfo(itemLink)
+            local herb = itemID and Herbarium.herbsByID[itemID]
 
-		-- different spells for different "ranks" ..
-			--local spellName = GetSpellInfo(arg3)
-			--if Herbarium.L["Herb Gathering"] ~= spellName then return end
+            if herb then
+                local sourceGUID = getGameObjectSourceGUID(lootSlot)
 
-		-- .. or always 2366?
-		if arg3 ~= 2366 then return end
+                if sourceGUID then
+                    pendingGatherLoot[lootSlot] = {
+                        itemID = itemID,
+                        sourceGUID = sourceGUID,
+                    }
 
-		-- same GUID as in before? we continue
-		if arg2 == Herbarium.CurrentPlantGUID and arg1 == "player" then
+                    Herbarium:debug("Tracking herb loot itemID: ", itemID, " source: ", sourceGUID)
+                end
+            end
+        end
+    end
+end
 
-			local playerName = UnitName(arg1)
-			local itemId = Herbarium.CurrentPlantItemId
+local function recordGather(itemID)
+    local herb = Herbarium.herbsByID[itemID]
+    if not herb then
+        return
+    end
 
-			local mapId = C_Map.GetBestMapForUnit("player")
-			
-			while mapId and C_Map.GetMapInfo(mapId).mapType > 3 do
-				mapId = C_Map.GetMapInfo(mapId).parentMapID
-			end
-			if not mapId then
-				local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
-				mapId = instanceID
-			end
-			
-			--Herbarium:debug(C_Map.GetMapInfo(mapId or 1).name)
+    local playerName = UnitName("player")
+    local gathered = Herbarium.ensure(HerbariumDB, playerName, "GATHERED")
+    local gatherLog = gathered[itemID]
+    local firstGather = gatherLog == nil
 
-			-- TOTAL GATHERED
-			-- create entry in DB if not exists..
-			if not HerbariumDB[playerName] or not HerbariumDB[playerName]["GATHERED"] or not HerbariumDB[playerName]["GATHERED"][itemId] then
-				local gatherLog = Herbarium.ensure(HerbariumDB, playerName, "GATHERED", itemId)
-				gatherLog.total = 1
-				gatherLog.zones = {}
+    -- Keep old SavedVariables usable even if the player gathers before opening
+    -- Herbarium and triggering the normal database migration.
+    if type(gatherLog) == "number" then
+        gatherLog = {
+            total = gatherLog,
+            zones = {},
+        }
+        gathered[itemID] = gatherLog
+        firstGather = false
+    elseif type(gatherLog) ~= "table" then
+        gatherLog = {
+            total = 0,
+            zones = {},
+        }
+        gathered[itemID] = gatherLog
+    end
 
-				if mapId then
-					gatherLog.zones[mapId] = {total = 1}
-				end
+    gatherLog.total = (gatherLog.total or 0) + 1
+    gatherLog.zones = gatherLog.zones or {}
 
-				Herbarium.ensureSet(HerbariumDB, gatherLog, playerName, "GATHERED", itemId)
+    local mapID = getGatherMapID()
+    if mapID then
+        gatherLog.zones[mapID] = gatherLog.zones[mapID] or { total = 0 }
+        gatherLog.zones[mapID].total = (gatherLog.zones[mapID].total or 0) + 1
+    end
 
-				PlaySound(7355)
-				PlaySound(3093)--3093 (writing sound) / 7355 (tutorial pling)
-				if Herbarium.CurrentPlantName then
-					Herbarium.printChat(Herbarium.L["GatherFirst"] .. Herbarium.CurrentPlantName)
-				end
-				
-			else 
-				-- .. else count up
-				local currentGatherLog = Herbarium.ensure(HerbariumDB, playerName, "GATHERED", itemId)
-				currentGatherLog.total = currentGatherLog.total + 1
+    Herbarium:debug("Gathered herb itemID: ", itemID, " mapID: ", mapID)
 
-				if mapId then
-					currentGatherLog.zones[mapId] = currentGatherLog.zones[mapId] or {total = 0}
-					currentGatherLog.zones[mapId].total = (currentGatherLog.zones[mapId].total or 0) + 1
-				end
+    if firstGather then
+        PlaySound(7355)
+        PlaySound(3093)
 
-				Herbarium.ensureSet(HerbariumDB, currentGatherLog, playerName, "GATHERED", itemId)
-			end
+        local itemName = C_Item.GetItemNameByID(itemID) or Herbarium.L[herb.name] or tostring(itemID)
+        Herbarium.printChat(Herbarium.L["GatherFirst"] .. itemName)
+    end
 
-			
+    Herbarium.checkAchievements()
+end
 
-			Herbarium.checkAchievements()
-			
-		end
-	end
+function Herbarium.handleEvent(self, event, ...)
+    if event == "LOOT_READY" then
+        cacheGatherLoot()
+        return
+    end
 
+    if event == "LOOT_SLOT_CLEARED" then
+        local lootSlot = ...
+        local pending = pendingGatherLoot[lootSlot]
+
+        if pending then
+            -- A single source can theoretically expose the same item in more
+            -- than one loot slot. Count that herb only once per resource node.
+            local gatherKey = pending.sourceGUID .. ":" .. pending.itemID
+
+            if not gatheredThisLoot[gatherKey] then
+                gatheredThisLoot[gatherKey] = true
+                recordGather(pending.itemID)
+            end
+
+            pendingGatherLoot[lootSlot] = nil
+        end
+
+        return
+    end
+
+    if event == "LOOT_CLOSED" then
+        clearTable(pendingGatherLoot)
+        clearTable(gatheredThisLoot)
+        return
+    end
+
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local unitTarget, _, spellID = ...
+
+        -- Keep the existing convenience behavior: using Find Herbs opens Herbarium.
+        if unitTarget == "player" and spellID == FIND_HERBS_SPELL_ID then
+            Herbarium:Open()
+        end
+    end
 end
 
 local f = CreateFrame("Frame")
---f:RegisterEvent("CHAT_MSG_SYSTEM")
-f:RegisterEvent("UNIT_SPELLCAST_SENT")
+f:RegisterEvent("LOOT_READY")
+f:RegisterEvent("LOOT_SLOT_CLEARED")
+f:RegisterEvent("LOOT_CLOSED")
 f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 f:SetScript("OnEvent", Herbarium.handleEvent)
 

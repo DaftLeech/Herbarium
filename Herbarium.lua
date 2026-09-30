@@ -4,6 +4,8 @@ local _, namespace = ...
 HerbariumDB = HerbariumDB or {}
 Herbarium = Herbarium or {}
 
+Herbarium.HERBALISM_SKILL_LINE_ID = C_TradeSkillUI.GetProfessionSkillLineID(Enum.Profession.Herbalism)
+
 
 -- print function with color
 function Herbarium.printChat(message)
@@ -12,15 +14,19 @@ end
 
 
 -- ==========================================================================================
--- profession level by name..
+-- Herbalism profession level by TradeSkillLineID
 -- ==========================================================================================
 function Herbarium.getProfessionLevel()
-	local numSkills = GetNumSkillLines();
-	for i=1, numSkills do
-		local skillname,_,_,skillrank,_,skillmodifier, skillMaxRank = GetSkillLineInfo(i)		
+	local profession1, profession2 = GetProfessions()
+	local professions = { profession1, profession2 }
 
-		if (skillname == Herbarium.L["herbalism"]) then
-			return skillrank, skillMaxRank, skillmodifier
+	for _, professionIndex in pairs(professions) do
+		if professionIndex then
+			local _, _, skillLevel, maxSkillLevel, _, _, skillLineID, skillModifier = GetProfessionInfo(professionIndex)
+
+			if skillLineID == Herbarium.HERBALISM_SKILL_LINE_ID then
+				return skillLevel, maxSkillLevel, skillModifier or 0
+			end
 		end
 	end
 end
@@ -100,8 +106,8 @@ end
 -- ==========================================================================================
 -- commands
 -- ==========================================================================================
-SLASH_Herbarium1 = "/Herbarium"
-SLASH_Herbarium1 = "/herb"
+SLASH_Herbarium1 = "/herbarium"
+SLASH_Herbarium2 = "/herb"
 SlashCmdList["Herbarium"] = function()
        
     if Herbarium.frame and Herbarium.frame:IsShown() then
@@ -114,8 +120,8 @@ end
 
 SLASH_HERBDEBUG1 = "/herbdebug"
 SlashCmdList["HERBDEBUG"] = function()
-    if not IsAddOnLoaded("Herbarium_Debug") then
-        LoadAddOn("Herbarium_Debug")
+    if not C_AddOns.IsAddOnLoaded("Herbarium_Debug") then
+        C_AddOns.LoadAddOn("Herbarium_Debug")
     else
         print("|cffff0000Herbarium Debug already loaded.|r")
     end
